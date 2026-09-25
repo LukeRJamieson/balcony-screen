@@ -1,36 +1,43 @@
-# Balcony privacy screen – owners corporation approval page
+# Balcony privacy screen and plant benches
 
-A single self-contained web page (`index.html`) with an interactive 3D model, sizes,
-materials, drawings and photos of the proposed balcony privacy screen and plant benches.
-Everything is built into the file (3D library, model, images), so it needs no build step
-and loads nothing from other websites.
+Five free-standing timber plant benches with lattice privacy screens for a
+first-floor townhouse balcony. Nothing is fixed to the building.
 
-## Put it on GitHub Pages
+**Live 3D model:** https://lukerjamieson.github.io/balcony-screen/
 
-1. Create a new repository on GitHub (for example `balcony-screen`).
-2. Upload `index.html` and `.nojekyll` to the root of the repository.
-   `.nojekyll` tells GitHub Pages to publish the page as-is instead of running Jekyll.
-   (Dotfiles can be hidden in file pickers: in the GitHub web uploader you can instead
-   click **Add file > Create new file**, name it `.nojekyll`, and commit it empty.)
-3. Go to **Settings > Pages**, set **Source** to *Deploy from a branch*, choose `main`
-   and `/ (root)`, and save.
-4. After a minute or two the page is live at `https://<your-username>.github.io/balcony-screen/`.
+This repository is both the website (`index.html` at the root, served by GitHub
+Pages) and the complete build project for the **506 mm deep bench** version.
 
-## Add images or update your details
+## What's here
 
-1. Open `https://<your-username>.github.io/balcony-screen/#edit`
-   (or open `index.html` directly from your computer or phone).
-2. Click **Edit this page** at the bottom, add photos or drawings, captions and your details.
-3. Click **Download updated page**. This saves a new `index.html` with everything built in.
-4. In the repository, click `index.html` > **...** > **Upload files** (or drag the new file onto
-   the repository page) to replace it, then commit. The live site updates within a few minutes;
-   refresh with a hard reload if you still see the old version.
+| Path | What it is |
+|---|---|
+| `index.html` | The approval page with the interactive 3D model. Self-contained; GitHub Pages serves it |
+| `Build_Guide.pdf`, `Build_Guide.docx` | Printable build guide: parts list, seven steps with a render at each stage, the 900 mm module, finishing |
+| `Cutting_Guide.pdf` | Every stock length drawn to scale, with each piece, kerf, offcuts and a tick box per length |
+| `BalconyScreenBench/` | The design model: Fusion 360 script (also plain Python), BOM and cut-list spreadsheet, drawing, cutting-guide generator, build README |
+| `stl/` | 3D-printable models of the AC unit, figure, BBQ and bistro set, at real size in mm |
+| `application/` | Owners corporation works application attachment (Word and PDF) |
+| `docs/github-pages.md` | Notes on hosting and updating the page |
 
-Visitors to the normal link don't see the edit option. Anyone who adds `#edit` can only change
-their own downloaded copy, never the published site.
+Online slide version of the build guide: https://claude.ai/artifact/VX7RYzKuyGwnUHXprddLsv
 
-## Privacy
+## The design at a glance
 
-The page includes your name and the property address. A GitHub Pages site can be opened by
-anyone who has (or guesses) the link. The page asks search engines not to index it, but
-that is a request, not a lock. Remove any details you don't want public before uploading.
+* Five modules, 600 / 600 / 900 / 600 / 600 mm wide, 3340 mm overall
+* 1820 mm high, 506 mm deep, bench top at 500, lower shelf at 130
+* 90x45 H3 pine frames bolted with M10 cup heads, 90x22 H3 decking boards and rails,
+  Lattice Makers economy lattice, merbau cover strips
+* About $966 in materials (see the spreadsheet)
+
+## Regenerating from the model
+
+Everything is generated from one model, so it all stays consistent. Edit `Config`
+in `BalconyScreenBench/BalconyScreenBench.py`, then:
+
+    cd BalconyScreenBench
+    python BalconyScreenBench.py     # dimensions, cut list, stability check
+    python export_bom.py             # rebuild the spreadsheet
+    python cutting_guide.py          # redraw ../Cutting_Guide.pdf
+
+Run `BalconyScreenBench.py` as a script inside Fusion 360 for the 3D CAD model.
