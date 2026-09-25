@@ -1229,7 +1229,39 @@ def _step(progress, msg):
         return True
 
 
-def build_module(root, tbm, model, mod, apps, progress):
+SECTION_LABEL = {"T90x45": "90x45 pine", "D90x22": "90x22 decking", "M42x19": "42x19 merbau"}
+
+
+def cutting_labels(model):
+    """Map each part id to the stock length it is cut from, using the same
+    optimised cutting plan as Cutting_Guide.pdf and the spreadsheet, so the
+    Fusion browser and the printed diagram use the same numbers."""
+    where = {}
+    for b in optimise_cuts(model):
+        for mark, length, pid in b["pieces"]:
+            where[pid] = b["n"]
+    return where
+
+
+def fusion_name(text):
+    """Component names can't contain some characters (e.g. / and :)."""
+    for bad, good in ((" / ", ", "), ("/", "-"), (":", " "), ("\\", "-"), ("*", ""), ("?", ""),
+                      ('"', ""), ("<", ""), (">", ""), ("|", "-")):
+        text = text.replace(bad, good)
+    return " ".join(text.split())
+
+
+def part_label(p, cut_n):
+    """Name shown in the Fusion browser, matching the cutting diagram label:
+    mark, length, part name, then which numbered stock length it comes from."""
+    if p.material.startswith("LAT"):
+        return fusion_name(f"{p.name} - whole sheet, not cut")
+    n = cut_n.get(p.pid)
+    where = f" - {SECTION_LABEL.get(p.material, p.material)} length #{n}" if n else ""
+    return fusion_name(f"{p.mark} {p.length:.0f} - {p.name}{where}")
+
+
+def build_module(root, tbm, model, mod, apps, progress, cut_n=None):
     """One top-level component per independent module, containing a component
     per timber part and its own Fixings sub-component, so each module can be
     moved, hidden or exported on its own."""
@@ -1251,13 +1283,15 @@ def build_module(root, tbm, model, mod, apps, progress):
             body = lattice_body(tbm, p, model.cfg)
         else:
             body = cut_fastener_holes(tbm, p, temp_box(tbm, p.box), mod_fixings)
-        short_id = p.pid.split("-", 1)[1]
-        comp = new_component(mod_comp, f"{p.mark}_{short_id}_{p.length:.0f}mm")
+        # Named like the cutting diagram: "A 1810 - Screen post / rear bench leg - 90x45 pine length #3"
+        comp = new_component(mod_comp, part_label(p, cut_n or {}))
         try:
-            comp.description = f"{p.name} | {CATALOG[p.material]['desc']} | L={p.length:.1f} mm"
+            comp.description = (f"{p.name} | {CATALOG[p.material]['desc']} | L={p.length:.1f} mm"
+                                f" | part id {p.pid}")
         except Exception:
             pass
-        add_bodies(comp, [body], [p.pid], apps.get(p.material))
+        body_name = p.name if p.material.startswith("LAT") else f"{p.mark} {p.length:.0f} {mod}"
+        add_bodies(comp, [body], [fusion_name(body_name)], apps.get(p.material))
 
     if BUILD_FIXINGS:
         fix = new_component(mod_comp, "Fixings")
@@ -1322,6 +1356,7 @@ def run(context):
         root = _design.rootComponent
         tbm = adsk.fusion.TemporaryBRepManager.get()
         apps = Appearances(_app, _design)
+        cut_n = cutting_labels(model)       # part id -> stock length number, as in Cutting_Guide.pdf
         _log("New design created (" + ("parametric" if PARAMETRIC_TIMELINE else "direct") + ")")
 
         progress = _ui.createProgressDialog()
@@ -1338,7 +1373,7 @@ def run(context):
         for mod in module_names(model):
             if not ok:
                 break
-            ok = build_module(root, tbm, model, mod, apps, progress)
+            ok = build_module(root, tbm, model, mod, apps, progress, cut_n)
 
         progress.hide()
         progress = None

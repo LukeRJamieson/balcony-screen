@@ -1,0 +1,10 @@
+{
+	"autodeskProduct": "Fusion360",
+	"type": "script",
+	"author": "Luke",
+	"description": {
+		"": "Balcony lattice screen fixed to a plant bench, with cut-list parts and all fixings"
+	},
+	"supportedOS": "windows|mac",
+	"editEnabled": true
+}

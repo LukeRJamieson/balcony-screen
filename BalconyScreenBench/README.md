@@ -21,7 +21,9 @@ Five free-standing modules (600 / 600 / 900 / 600 / 600). Each module is one Lat
 3. Select **BalconyScreenBench** > **Run**. Progress bar > a **new design tab** > summary dialog.
 
 The model has one top-level component per module (`Module 1 - 600 wide` ... `Module 5 - 600 wide`).
-Each contains a component per timber part (`MARK_PARTID_length`) plus its own **Fixings** sub-component
+Each contains a component per timber part, named to match `Cutting_Guide.pdf` - e.g.
+`A 1810 - Screen post, rear bench leg - 90x45 pine length #1` is mark A, 1810 mm long, cut from
+stock length #1 on the 90x45 pages - plus its own **Fixings** sub-component
 (red M10 bolts, blue 10G x 50, green 10G x 65, purple 10G x 100, black packers), so modules can be moved
 or hidden individually.
 
